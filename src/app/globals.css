@@ -1,0 +1,862 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/* Brand tokens (sampled from public/brand/logo.png)                    */
+/* ------------------------------------------------------------------ */
+:root {
+  --ink: #0a0a0b;
+  --carbon: #141416;
+  --graphite: #1e1f23;
+  --steel: #2c2e33;
+  --red: #e5080f; /* white text on it: 4.8:1 */
+  --red-deep: #b00a10;
+  --red-glow: #ff3b3f; /* small red text on ink/carbon/graphite */
+  --chrome-1: #f5f5f6;
+  --chrome-2: #cfd0d3;
+  --chrome-3: #8f9399;
+  --text: #ffffff;
+  --text-muted: #a6abb3;
+
+  --header-h: 4rem;
+  --topbar-h: 2.75rem;
+  --action-bar-h: 4rem;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 80rem) {
+  :root {
+    --header-h: 4.75rem;
+  }
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-ink: var(--ink);
+  --color-carbon: var(--carbon);
+  --color-graphite: var(--graphite);
+  --color-steel: var(--steel);
+  --color-red: var(--red);
+  --color-red-deep: var(--red-deep);
+  --color-red-glow: var(--red-glow);
+  --color-chrome-1: var(--chrome-1);
+  --color-chrome-2: var(--chrome-2);
+  --color-chrome-3: var(--chrome-3);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --font-display: var(--font-saira), "Arial Narrow", system-ui, sans-serif;
+  --font-sans: var(--font-barlow), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --breakpoint-xs: 26rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + 1rem);
+  }
+
+  body {
+    background-color: var(--ink);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (min-width: 48rem) {
+    body {
+      font-size: 1.0625rem;
+    }
+  }
+
+  ::selection {
+    background: var(--red);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--red-glow);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.lenis) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Components                                                          */
+/* ------------------------------------------------------------------ */
+@layer components {
+  .container-x {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .container-x {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 80rem) {
+    .container-x {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* Display type: echoes the italic SPEEDSTER wordmark */
+  .display {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.98;
+  }
+
+  /* Phone sizes are deliberately compact; they grow with the viewport. */
+  .h1 {
+    font-size: clamp(1.95rem, 0.95rem + 4.8vi, 4.75rem);
+  }
+  .h2 {
+    font-size: clamp(1.5rem, 1rem + 2.6vi, 3.25rem);
+  }
+  .h2-sm {
+    font-size: clamp(1.35rem, 0.95rem + 1.9vi, 2.6rem);
+    line-height: 1.02;
+  }
+  .h3 {
+    font-size: clamp(1.1rem, 0.95rem + 0.9vi, 1.6rem);
+    line-height: 1.1;
+  }
+
+  .text-chrome {
+    background: linear-gradient(
+      180deg,
+      var(--chrome-1) 0%,
+      #ffffff 30%,
+      var(--chrome-2) 52%,
+      var(--chrome-3) 58%,
+      var(--chrome-1) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Eyebrow: small caps label with a forward-leaning red bar */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--red-glow);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.6rem;
+    height: 0.3rem;
+    background: linear-gradient(90deg, transparent, var(--red));
+    transform: skewX(-20deg);
+  }
+
+  /* Buttons: skewed shell, upright label */
+  .btn {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0 1.35rem;
+    border-radius: 0.4rem;
+    font-weight: 700;
+    font-size: 0.975rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transform: skewX(-10deg);
+    overflow: hidden;
+    transition:
+      transform 0.25s var(--ease-out-expo),
+      background-color 0.2s,
+      border-color 0.2s,
+      box-shadow 0.3s;
+  }
+  .btn > .btn-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    transform: skewX(10deg);
+  }
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.38) 48%,
+      transparent 66%
+    );
+    transform: translateX(-130%);
+    transition: transform 0.75s var(--ease-out-expo);
+    pointer-events: none;
+  }
+  .btn:hover::after,
+  .btn:focus-visible::after {
+    transform: translateX(130%);
+  }
+  .btn:active {
+    transform: skewX(-10deg) translateY(1px) scale(0.985);
+  }
+
+  .btn-primary {
+    color: #fff;
+    background: linear-gradient(180deg, var(--red) 0%, var(--red) 45%, var(--red-deep) 100%);
+    box-shadow:
+      0 10px 30px -10px rgb(229 8 15 / 0.7),
+      inset 0 1px 0 rgb(255 255 255 / 0.25);
+  }
+  .btn-primary:hover {
+    box-shadow:
+      0 14px 38px -10px rgb(255 59 63 / 0.8),
+      inset 0 1px 0 rgb(255 255 255 / 0.3);
+  }
+
+  .btn-ghost {
+    color: var(--text);
+    background: rgb(255 255 255 / 0.03);
+    border: 1px solid rgb(207 208 211 / 0.35);
+  }
+  .btn-ghost:hover {
+    border-color: var(--chrome-1);
+    background: rgb(255 255 255 / 0.07);
+  }
+
+  .btn-dark {
+    color: var(--text);
+    background: var(--graphite);
+    border: 1px solid var(--steel);
+  }
+  .btn-dark:hover {
+    border-color: var(--red);
+  }
+
+  .btn-block {
+    width: calc(100% - 0.75rem);
+    margin-inline: 0.375rem;
+  }
+
+  .btn-lg {
+    min-height: 3.125rem;
+    padding: 0 1rem;
+    font-size: 0.9rem;
+  }
+  @media (min-width: 48rem) {
+    .btn-lg {
+      min-height: 3.5rem;
+      padding: 0 1.75rem;
+      font-size: 1.05rem;
+    }
+  }
+  .btn-sm {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Soft pulse ring for phone buttons */
+  .btn-pulse {
+    animation: phone-pulse 2.6s ease-out infinite;
+  }
+
+  /* Cards */
+  .card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 0.9rem;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0) 40%),
+      var(--graphite);
+    border: 1px solid rgb(255 255 255 / 0.07);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
+    transition:
+      border-color 0.3s,
+      box-shadow 0.4s,
+      transform 0.4s var(--ease-out-expo);
+  }
+  .card-hover:hover,
+  .card-hover:focus-within {
+    border-color: rgb(229 8 15 / 0.55);
+    box-shadow:
+      0 24px 50px -24px rgb(229 8 15 / 0.55),
+      0 1px 0 rgb(255 255 255 / 0.06) inset;
+  }
+  .card-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      110deg,
+      transparent 35%,
+      rgb(255 255 255 / 0.09) 48%,
+      transparent 60%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.9s var(--ease-out-expo);
+  }
+  .card-hover:hover::after {
+    transform: translateX(120%);
+  }
+
+  /* Icon badge: skewed chip holding a lucide icon */
+  .icon-chip {
+    display: inline-grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 0.6rem;
+    color: #fff;
+    background: linear-gradient(160deg, var(--red) 0%, var(--red-deep) 100%);
+    box-shadow: 0 10px 24px -10px rgb(229 8 15 / 0.8);
+    transform: skewX(-10deg);
+  }
+  .icon-chip > svg {
+    transform: skewX(10deg);
+  }
+  @media (min-width: 48rem) {
+    .icon-chip {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+
+  /* Forward-leaning divider line */
+  .speed-rule {
+    height: 3px;
+    width: 4.5rem;
+    background: linear-gradient(90deg, var(--red), transparent);
+    transform: skewX(-30deg);
+  }
+
+  .skip-link {
+    position: fixed;
+    left: 1rem;
+    top: 0.75rem;
+    z-index: 100;
+    padding: 0.75rem 1.1rem;
+    border-radius: 0.4rem;
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+    transform: translateY(-200%);
+    transition: transform 0.2s;
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Surfaces and motifs                                                 */
+/* ------------------------------------------------------------------ */
+@layer utilities {
+  /* Carbon-fibre weave, kept at ~3% so it reads as texture, not pattern */
+  .bg-carbon-fiber {
+    position: relative;
+    isolation: isolate;
+  }
+  .bg-carbon-fiber::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.035;
+    pointer-events: none;
+    background:
+      linear-gradient(27deg, #fff 5px, transparent 5px) 0 5px,
+      linear-gradient(207deg, #fff 5px, transparent 5px) 10px 0,
+      linear-gradient(27deg, #888 5px, transparent 5px) 0 10px,
+      linear-gradient(207deg, #888 5px, transparent 5px) 10px 5px,
+      linear-gradient(90deg, #bbb 10px, transparent 10px),
+      linear-gradient(#ccc 25%, #999 25%, #999 50%, transparent 50%, transparent 75%, #eee 75%, #eee);
+    background-size: 20px 20px;
+  }
+
+  /* Brushed metal: fine horizontal grain */
+  .bg-brushed {
+    position: relative;
+    isolation: isolate;
+  }
+  .bg-brushed::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.04;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      #fff 0 1px,
+      transparent 1px 3px
+    );
+  }
+
+  .glow-red {
+    box-shadow: 0 0 0 1px rgb(229 8 15 / 0.4), 0 20px 60px -20px rgb(229 8 15 / 0.6);
+  }
+
+  .pb-action-bar {
+    padding-bottom: calc(var(--action-bar-h) + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 48rem) {
+    .pb-action-bar {
+      padding-bottom: 0;
+    }
+  }
+}
+
+/* Red speed streaks: the logo's motion lines, drifting right to left */
+.speed-streaks {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.speed-streaks > span {
+  position: absolute;
+  right: -40%;
+  height: var(--h, 3px);
+  width: var(--w, 38%);
+  top: var(--y, 50%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--red) 70%, var(--red-glow));
+  opacity: var(--o, 0.5);
+  filter: drop-shadow(0 0 6px rgb(229 8 15 / 0.6));
+  transform: skewX(-30deg);
+  animation: streak var(--d, 3.6s) linear var(--delay, 0s) infinite;
+}
+
+@keyframes streak {
+  from {
+    transform: translateX(0) skewX(-30deg);
+  }
+  to {
+    transform: translateX(-260%) skewX(-30deg);
+  }
+}
+
+@keyframes phone-pulse {
+  0% {
+    box-shadow:
+      0 0 0 0 rgb(255 59 63 / 0.55),
+      0 10px 30px -10px rgb(229 8 15 / 0.7);
+  }
+  70% {
+    box-shadow:
+      0 0 0 14px rgb(255 59 63 / 0),
+      0 10px 30px -10px rgb(229 8 15 / 0.7);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgb(255 59 63 / 0),
+      0 10px 30px -10px rgb(229 8 15 / 0.7);
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-14deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(-12deg);
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -13;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Cards rise in as they scroll into view on phones. Driven by the scroll
+   position itself (no JS); cards already on screen at load are left as is. */
+@supports (animation-timeline: view()) {
+  @media (max-width: 47.99rem) and (prefers-reduced-motion: no-preference) {
+    main .card {
+      animation: rise-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem) scale(0.98);
+  }
+}
+
+/* Hero 3D key. Phones and tablets: a compact full-width stage between the
+   headline and the paragraph, framed by the scene from --key-fill (share of
+   the width the key spans). Desktop: soft edges so the canvas blends into
+   the hero background. */
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  --key-fill: 0.7;
+}
+@media (min-width: 48rem) {
+  .hero-canvas {
+    --key-fill: 0.45;
+  }
+}
+@media (min-width: 64rem) {
+  .hero-canvas {
+    inset: -10%;
+    --key-fill: initial;
+    mask-image: radial-gradient(closest-side, #000 84%, transparent);
+  }
+}
+
+/* The stage the key floats over: a top light, a red glow and a lit floor line. */
+.hero-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero-stage-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72%;
+  height: 62%;
+  border-radius: 50%;
+  background: rgb(229 8 15 / 0.32);
+  filter: blur(48px);
+  transform: translate(-50%, -50%);
+}
+.hero-stage-floor {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  width: 78%;
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, rgb(255 59 63 / 0.75) 30%, rgb(255 255 255 / 0.55) 50%, rgb(255 59 63 / 0.75) 70%, transparent);
+}
+.hero-stage-floor::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 70%;
+  height: 2.5rem;
+  border-radius: 50%;
+  transform: translate(-50%, 50%);
+  background: radial-gradient(closest-side, rgb(229 8 15 / 0.35), transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/* First-visit intro (under 1 s)                                        */
+/* ------------------------------------------------------------------ */
+.intro-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  cursor: pointer;
+  animation: intro-out 0.25s ease-in 0.75s forwards;
+}
+html[data-intro-seen] .intro-loader,
+.intro-loader[data-seen],
+.intro-loader[data-done] {
+  display: none;
+}
+.intro-key {
+  position: relative;
+  width: 220px;
+  height: 90px;
+  animation: intro-turn 0.3s ease-in-out 0.45s forwards;
+}
+.intro-key > span {
+  position: absolute;
+  display: block;
+}
+.intro-bow {
+  left: 13px;
+  top: 18px;
+  width: 54px;
+  height: 54px;
+  border: 4px solid var(--chrome-1);
+  border-radius: 50%;
+}
+.intro-bow-inner {
+  left: 31px;
+  top: 36px;
+  width: 18px;
+  height: 18px;
+}
+.intro-shaft {
+  left: 66px;
+  top: 43px;
+  width: 136px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--red-glow);
+}
+.intro-tooth {
+  top: 45px;
+  width: 4px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--red-glow);
+}
+.intro-tip {
+  left: 194px;
+  top: 37px;
+  width: 16px;
+  height: 16px;
+  border-top: 4px solid var(--red-glow);
+  border-right: 4px solid var(--red-glow);
+  transform: rotate(45deg);
+}
+/* Glow as a box-shadow: gradients count as images, which would make this
+   overlay the page's first contentful paint. */
+.intro-key::before {
+  content: "";
+  position: absolute;
+  inset: 30% 20%;
+  border-radius: 50%;
+  box-shadow: 0 0 70px 40px rgb(229 8 15 / 0.28);
+}
+.intro-wipe {
+  position: absolute;
+  inset: -10% -4%;
+  background: var(--ink);
+  transform-origin: right center;
+  animation: intro-wipe 0.4s ease-out forwards;
+}
+@keyframes intro-wipe {
+  to {
+    transform: scaleX(0);
+  }
+}
+@keyframes intro-turn {
+  to {
+    transform: rotate(-90deg) scale(0.9);
+  }
+}
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-loader {
+    display: none;
+  }
+}
+
+/* 404: the key keeps trying the lock; the shackle pops open while "Back to
+   home" is hovered or focused. Under reduced motion the key rests still. */
+.lockout-key {
+  transform: translateX(34px);
+  transform-origin: 0 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lockout-key {
+    animation: lockout-try 3.4s ease-in-out infinite;
+  }
+}
+@keyframes lockout-try {
+  0%,
+  100% {
+    transform: translateX(34px);
+  }
+  22%,
+  30% {
+    transform: translateX(0) rotate(0);
+  }
+  36% {
+    transform: translateX(0) rotate(-7deg);
+  }
+  42% {
+    transform: translateX(0) rotate(6deg);
+  }
+  48% {
+    transform: translateX(0) rotate(-4deg);
+  }
+  54% {
+    transform: translateX(0) rotate(2deg);
+  }
+  60% {
+    transform: translateX(0) rotate(0);
+  }
+  78% {
+    transform: translateX(34px);
+  }
+}
+.lockout-shackle {
+  /* Pivots on its left leg, like a real padlock. */
+  transform-origin: 98px 0;
+  transition: transform 0.55s cubic-bezier(0.34, 1.6, 0.64, 1);
+}
+.lockout-led {
+  transition: stroke 0.3s;
+}
+.lockout-scene:has(.lockout-trigger:hover, .lockout-trigger:focus-visible) .lockout-shackle {
+  transform: translateY(-30px) scaleX(0.55);
+}
+.lockout-scene:has(.lockout-trigger:hover, .lockout-trigger:focus-visible) .lockout-key {
+  animation: none;
+  transform: translateX(0);
+}
+.lockout-scene:has(.lockout-trigger:hover, .lockout-trigger:focus-visible) .lockout-led {
+  stroke: #ff6a6d;
+}
+
+/* Contact form controls. 16px+ text so phones don't zoom in on focus. */
+.form-control {
+  width: 100%;
+  min-height: 3.125rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: var(--ink);
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.4;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.form-control::placeholder {
+  color: #7d828a;
+}
+.form-control:hover {
+  border-color: rgb(255 255 255 / 0.26);
+}
+.form-control:focus-visible {
+  outline: none;
+  border-color: var(--red-glow);
+  box-shadow: 0 0 0 3px rgb(255 59 63 / 0.3);
+}
+.form-control[aria-invalid="true"] {
+  border-color: var(--red-glow);
+}
+select.form-control {
+  appearance: none;
+  padding-right: 2.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cfd0d3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 1.1rem;
+}
+select.form-control:invalid,
+select.form-control option[value=""] {
+  color: #7d828a;
+}
+select.form-control option {
+  color: var(--text);
+  background: var(--graphite);
+}
+textarea.form-control {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+/* FAQ accordion built on <details> */
+.faq-item > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.faq-item > summary::-webkit-details-marker {
+  display: none;
+}
+.faq-item .faq-icon {
+  transition: transform 0.3s var(--ease-out-expo);
+}
+.faq-item[open] .faq-icon {
+  transform: rotate(45deg);
+}
+.faq-item::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 0.35s var(--ease-out-expo),
+    content-visibility 0.35s allow-discrete;
+}
+.faq-item[open]::details-content {
+  block-size: auto;
+}
+
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .speed-streaks {
+    display: none;
+  }
+}
