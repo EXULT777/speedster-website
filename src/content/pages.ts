@@ -3,6 +3,7 @@
  */
 
 import type { IconName } from "@/components/ui/icon";
+import { leadsEnabled } from "@/lib/leads";
 
 export const aboutPage = {
   title: "About Speedster Lock & Key",
@@ -116,6 +117,11 @@ export const privacyPage = {
       heading: "How form messages reach us",
       paragraphs: [
         "Contact form messages are delivered to our email inbox by Web3Forms, a form-delivery service. If that service is unavailable, the form opens a pre-filled email in your own email app instead, and nothing is sent until you choose to send it.",
+        ...(leadsEnabled
+          ? [
+              "We also keep a copy of each form message in a private database run by Google Firebase, so we can follow up on every request. Only we can read it, and we delete messages once we no longer need them.",
+            ]
+          : []),
         "Like most websites, the company that hosts this site may keep standard technical logs, such as IP addresses and the pages requested, to keep the site running and secure.",
       ],
     },

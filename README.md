@@ -34,7 +34,8 @@ All copy and business details live in `src/content/`. Pages are generated from t
 
 | File            | What's in it                                                                                    |
 | --------------- | ----------------------------------------------------------------------------------------------- |
-| `site.ts`       | Business name, phone, email, hours, license number, reviews, stats, photos, footer and CTA copy |
+| `site-data.json` | Phone, email, opening hours, license number, reviews, stats and photos. Edited by the [admin panel](#admin-panel) |
+| `site.ts`       | Business name, region, footer and CTA copy; builds the phone/email links and hours wording from `site-data.json` |
 | `services.ts`   | Service categories and every sub-service (title, summary, icon, URL slug)                       |
 | `service-details.ts` | The longer copy on each sub-service page: intro, common situations, how we handle it, steps |
 | `brands.ts`     | Vehicle makes on the Car Key Replacement page, each with its own intro and the key types it uses |
@@ -45,14 +46,45 @@ All copy and business details live in `src/content/`. Pages are generated from t
 | `pages.ts`      | About, Contact, Privacy Policy and 404 copy (update `lastUpdated` when the policy changes)      |
 | `navigation.ts` | Main menu items                                                                                 |
 
-Some sections only appear when they have real data:
+Some sections only appear when they have real data (all in `site-data.json`, easiest to change from `/admin`):
 
-- **License number**: set `licenseNumber` in `site.ts` and "TX License #…" appears in the top bar and footer.
-- **Reviews**: add entries to `reviews` (and optionally `googleReviewUrl`) and a reviews section appears on the homepage.
+- **License number**: set `licenseNumber` and "TX License #…" appears in the top bar and footer.
+- **Reviews**: add entries to `reviews` and a reviews section appears on the homepage. With `googleReviewUrl` set, a "Leave us a review on Google" button appears under it.
 - **Stats**: add entries to `stats` and a numbers strip appears on the About page.
-- **Photos**: add entries to `photos` (files go in `public/`) and a photo grid appears on the About page.
+- **Photos**: add entries to `photos` (files go in `public/photos/`) and a photo grid appears on the About page.
 
 Leave them empty and those sections stay hidden.
+
+## Admin panel
+
+`/admin` (https://exult777.github.io/speedster-website/admin/) is a private editing page. It isn't linked from the site and search engines are told not to list it. It has:
+
+- **Business**: phone, email, opening hours, license number, total review count, Google review link
+- **Reviews**, **Photos** (upload, describe, reorder, delete), **Stats**
+- **Leads**: contact-form messages (needs Firebase, below)
+- **Clear all**: empties reviews, photos and stats and deletes every lead. Phone, email and hours are kept.
+
+Every "Delete all" asks you to type DELETE.
+
+**How saving works.** The site has no server, so **Save** commits your changes to this repository (`src/content/site-data.json`, plus photo files in `public/photos/`) using your GitHub token. That push triggers the deploy workflow, and the page shows when the new version is live (about 1–2 minutes). Every save is a commit, so anything deleted from reviews, photos or stats can be restored from the repository history. If the data changed in another tab or device since you opened the page, Save stops and asks you to reload, so nothing is overwritten.
+
+**Signing in.** You sign in with a username and password. The first visit to `/admin` shows a one-time setup screen: choose the username and password, and paste a GitHub fine-grained token (made at **GitHub → Settings → Developer settings → Fine-grained tokens** for the `speedster-website` repository only, with **Contents: Read and write** and **Actions: Read-only**). The token is saved in `src/content/admin-vault.json`, encrypted in the browser with the username and password (PBKDF2 + AES-GCM); the password itself is never stored. After the site rebuilds, the username and password are all you need. Change the password on the **Password** tab.
+
+Because the repository is public, the encrypted file is public too, and the password is the only thing protecting it: someone who guesses it can change the website. Use a long, uncommon password. If the token expires or is deleted, sign-in offers **Set up again** to paste a new one. To lock everyone out immediately, delete the token on GitHub.
+
+### Contact-form leads (Firebase)
+
+The repository is public, so leads are never stored in it. They go to a free Google Firebase database instead, which only your account can read. Until this is set up, the Leads tab shows these steps and messages only arrive by email.
+
+1. At [console.firebase.google.com](https://console.firebase.google.com/), create a project (Google Analytics is not needed).
+2. **Build → Firestore Database → Create database**, production mode, any US location.
+3. **Build → Authentication → Get started → Email/Password**: enable it. Under **Users → Add user**, add `speedsterlock@gmail.com` (set in `src/lib/leads.ts`) with the **same password as your admin login**, so one sign-in opens both. Copy the **User UID** shown in the list.
+4. **Firestore Database → Rules**: paste the contents of `firebase/firestore.rules`, replace `PASTE_YOUR_ADMIN_UID_HERE` with your User UID, and **Publish**. These rules let anyone send a message but only your account read or delete them.
+5. Optional but recommended: **Authentication → Settings → User actions**, untick **Enable create (sign-up)** so nobody else can make an account.
+6. **Project settings → General**: copy the **Web API key** and **Project ID**. (If no Web API key shows, add a Web app there first.)
+7. On GitHub: **Settings → Secrets and variables → Actions → Variables**, add `FIREBASE_API_KEY` and `FIREBASE_PROJECT_ID`, then re-run the deploy workflow.
+
+Once it is on, each contact-form message is emailed (when `WEB3FORMS_KEY` is set) **and** saved for `/admin`; the Privacy Policy automatically adds a sentence saying so. The Web API key is meant to be public; the rules are what protect the leads.
 
 ## Logo and icons
 
@@ -77,6 +109,7 @@ Create `.env.local` for local development, or set these in your hosting dashboar
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`       | The live site address, e.g. `https://www.example.com`. Used for canonical links, the sitemap and social previews. On Vercel it defaults to the project's production domain. |
 | `NEXT_PUBLIC_WEB3FORMS_KEY`  | Access key from [web3forms.com](https://web3forms.com) for the contact form. Without it, the form opens a pre-filled email instead.  |
+| `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase project that stores contact-form leads for `/admin` (see [Contact-form leads](#contact-form-leads-firebase)). Without them, nothing is stored. |
 
 ## Deploy to GitHub Pages
 

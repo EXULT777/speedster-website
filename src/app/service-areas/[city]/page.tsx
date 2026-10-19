@@ -8,6 +8,7 @@ import { MiniMap } from "@/components/sections/mini-map";
 import { PageHero } from "@/components/sections/page-hero";
 import { Section, SectionHeading } from "@/components/ui/section";
 import { cities, getCity } from "@/content/areas";
+import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: PageProps<"/service-areas/[ci
   if (!city) return {};
   return pageMetadata({
     title: `Locksmith in ${city.name}, TX`,
-    description: `${city.intro} Call Speedster Lock & Key at (432) 216-0108.`,
+    description: `${city.intro} Call Speedster Lock & Key at ${site.phone.display}.`,
     path: `/service-areas/${city.slug}`,
   });
 }

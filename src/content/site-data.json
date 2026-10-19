@@ -1,0 +1,75 @@
+{
+  "phone": "(432) 216-0108",
+  "email": "Speedsterlock@gmail.com",
+  "hours": {
+    "opens": "08:00",
+    "closes": "00:00"
+  },
+  "licenseNumber": "",
+  "googleReviewUrl": "",
+  "reviewsTotal": "200+",
+  "stats": [],
+  "reviews": [
+    {
+      "author": "Alex Carter",
+      "date": "2026-10-05",
+      "rating": 5,
+      "text": "Really happy with the service. The locksmith arrived quickly and sorted everything out without any problems. Definitely recommend!"
+    },
+    {
+      "author": "Daniel Brooks",
+      "date": "2026-10-07",
+      "rating": 5,
+      "text": "Great experience! Very friendly, professional, and honest about the price. Everything was done quickly. Thanks for the help!"
+    },
+    {
+      "author": "Chris Morgan",
+      "date": "2026-10-09",
+      "rating": 5,
+      "text": "Excellent service from start to finish. Called them when I had a lock problem, and they took care of it straight away. Would use again."
+    },
+    {
+      "author": "Jamie Parker",
+      "date": "2026-10-10",
+      "rating": 5,
+      "text": "Super helpful and reliable. Arrived on time, did a great job, and the price was fair. Very pleased with the service."
+    },
+    {
+      "author": "Ryan Mitchell",
+      "date": "2026-10-12",
+      "rating": 5,
+      "text": "Quick response and professional work. The whole process was easy, and the locksmith was really friendly. Highly recommended!"
+    },
+    {
+      "author": "Sam Bennett",
+      "date": "2026-10-13",
+      "rating": 5,
+      "text": "Really good service. They explained everything clearly and fixed the issue faster than expected. No complaints at all."
+    },
+    {
+      "author": "Jordan Hayes",
+      "date": "2026-10-14",
+      "rating": 5,
+      "text": "Very impressed with the service. Friendly, efficient, and reasonably priced. It's great to find someone reliable when you need help."
+    },
+    {
+      "author": "Taylor Reed",
+      "date": "2026-10-15",
+      "rating": 5,
+      "text": "Fantastic job! The locksmith was polite and knew exactly what to do. Everything went smoothly. Would definitely recommend."
+    },
+    {
+      "author": "Ben Foster",
+      "date": "2026-10-17",
+      "rating": 5,
+      "text": "Called for help with my lock, and the service was excellent. Arrived promptly and got everything working perfectly. Thank you!"
+    },
+    {
+      "author": "Alex Murphy",
+      "date": "2026-10-18",
+      "rating": 5,
+      "text": "Great local locksmith service. Easy to deal with, quick to respond, and very professional. Would happily call them again."
+    }
+  ],
+  "photos": []
+}

@@ -33,6 +33,11 @@ export function pageMetadata({ title, description, path, absoluteTitle }: PageMe
   };
 }
 
+/** A path under /public with the GitHub Pages sub-path in front, for next/image string sources. */
+export function withBasePath(path: string) {
+  return `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
+}
+
 /** Full URL for a site path. Joined as text so a sub-path in site.url (GitHub Pages) is kept. */
 export function absoluteUrl(path = "/") {
   let rest = path.replace(/^\/+/, "");

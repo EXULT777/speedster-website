@@ -3,6 +3,7 @@ import { Barlow, Saira } from "next/font/google";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { MobileActionBar } from "@/components/layout/mobile-action-bar";
+import { SiteChrome } from "@/components/layout/site-chrome";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { TopBar } from "@/components/layout/top-bar";
 import { introSeenScript } from "@/components/home/intro-script";
@@ -68,15 +69,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <TopBar />
-        <Header />
+        <SiteChrome>
+          <TopBar />
+          <Header />
+        </SiteChrome>
         <main id="main" tabIndex={-1} className="outline-none">
           {children}
         </main>
-        <Footer />
-        <MobileActionBar />
-        <SmoothScroll />
-        <JsonLd data={localBusinessSchema()} />
+        <SiteChrome>
+          <Footer />
+          <MobileActionBar />
+          <SmoothScroll />
+          <JsonLd data={localBusinessSchema()} />
+        </SiteChrome>
       </body>
     </html>
   );

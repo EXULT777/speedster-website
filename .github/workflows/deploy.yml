@@ -35,6 +35,10 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://exult777.github.io/speedster-website
           # Add this secret in Settings → Secrets and variables → Actions to turn on email delivery.
           NEXT_PUBLIC_WEB3FORMS_KEY: ${{ secrets.WEB3FORMS_KEY }}
+          # Firebase project that stores contact-form leads for /admin (see README).
+          # Add both under Settings → Secrets and variables → Actions → Variables.
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ vars.FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

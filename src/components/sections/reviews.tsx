@@ -1,4 +1,5 @@
 import { Quote, Star } from "lucide-react";
+import { buttonClass } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section";
 import { site, type Review } from "@/content/site";
 import { cn } from "@/lib/cn";
@@ -130,7 +131,7 @@ export function Reviews() {
             <span className="display text-chrome text-3xl leading-none md:text-4xl">{average.toFixed(1)}</span>
             <Stars rating={Math.round(average)} className="size-5 md:size-6" />
             <span className="text-sm text-muted md:text-base">
-              from {site.reviewsTotal} customer reviews
+              from {site.reviewsTotal || reviews.length} customer reviews
             </span>
           </div>
         )}
@@ -143,6 +144,17 @@ export function Reviews() {
           {row(true)}
         </div>
       </div>
+
+      {site.googleReviewUrl && (
+        <div className="container-x relative mt-7 flex justify-center md:mt-12">
+          <a href={site.googleReviewUrl} target="_blank" rel="noopener" className={buttonClass("ghost", "md")}>
+            <span className="btn-label">
+              <Star aria-hidden="true" className="size-4" strokeWidth={2.25} />
+              Leave us a review on Google
+            </span>
+          </a>
+        </div>
+      )}
     </section>
   );
 }

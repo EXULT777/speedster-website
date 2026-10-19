@@ -20,7 +20,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: `Locksmith in Midland, Odessa, Lubbock & Amarillo | ${site.name}`,
   description:
-    "Locked out or need a new key? Speedster Lock & Key is a mobile locksmith for homes, businesses, and vehicles in Midland, Odessa, Lubbock, and Amarillo. Open daily 8 AM to midnight.",
+    `Locked out or need a new key? Speedster Lock & Key is a mobile locksmith for homes, businesses, and vehicles in Midland, Odessa, Lubbock, and Amarillo. Open daily ${site.hours.shortRange}.`,
   path: "/",
   absoluteTitle: true,
 });

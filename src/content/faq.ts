@@ -3,6 +3,8 @@
  * About, Contact and the inner pages, and published as FAQPage structured data.
  */
 
+import { site } from "./site";
+
 export type FaqItem = { question: string; answer: string };
 
 export const faqHeading = "Frequently Asked Questions";
@@ -16,7 +18,7 @@ export const faqs: FaqItem[] = [
   {
     question: "What are your business hours?",
     answer:
-      "We’re available daily from 8:00 AM to 12:00 AM (midnight) to assist with your locksmith needs.",
+      `We’re available daily from ${site.hours.range} to assist with your locksmith needs.`,
   },
   {
     question: "How quickly can a locksmith arrive?",

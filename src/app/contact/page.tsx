@@ -19,7 +19,7 @@ const path = "/contact";
 export const metadata: Metadata = pageMetadata({
   title: "Contact Us",
   description:
-    "Call Speedster Lock & Key at (432) 216-0108 or send a message. Mobile locksmith service in Midland, Odessa, Lubbock, and Amarillo, daily 8 AM to midnight.",
+    `Call Speedster Lock & Key at ${site.phone.display} or send a message. Mobile locksmith service in Midland, Odessa, Lubbock, and Amarillo, daily ${site.hours.shortRange}.`,
   path,
 });
 

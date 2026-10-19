@@ -6,6 +6,7 @@ import { CallButton, buttonClass } from "@/components/ui/button";
 import { contactPage } from "@/content/pages";
 import { site } from "@/content/site";
 import { cn } from "@/lib/cn";
+import { leadsEnabled, saveLead, type LeadInput } from "@/lib/leads";
 
 const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
@@ -72,6 +73,18 @@ function mailtoHref(values: Values) {
   return `mailto:${site.email.address}?subject=${encodeURIComponent(subject(values))}&body=${encodeURIComponent(summary(values))}`;
 }
 
+function leadFrom(values: Values): LeadInput {
+  return {
+    name: values.name.trim(),
+    phone: values.phone,
+    email: values.email.trim() || undefined,
+    city: values.city,
+    service: values.service,
+    vehicle: needsVehicle(values.service) ? values.vehicle.trim() || undefined : undefined,
+    message: values.message.trim(),
+  };
+}
+
 async function sendWithWeb3Forms(values: Values) {
   const response = await fetch(WEB3FORMS_URL, {
     method: "POST",
@@ -80,13 +93,7 @@ async function sendWithWeb3Forms(values: Values) {
       access_key: WEB3FORMS_KEY,
       subject: subject(values),
       from_name: site.name,
-      name: values.name.trim(),
-      phone: values.phone,
-      email: values.email.trim() || undefined,
-      city: values.city,
-      service: values.service,
-      vehicle: needsVehicle(values.service) ? values.vehicle.trim() || undefined : undefined,
-      message: values.message.trim(),
+      ...leadFrom(values),
     }),
   });
   const result = (await response.json().catch(() => null)) as { success?: boolean } | null;
@@ -94,9 +101,10 @@ async function sendWithWeb3Forms(values: Values) {
 }
 
 /**
- * Contact form. Sends through Web3Forms when NEXT_PUBLIC_WEB3FORMS_KEY is set;
- * without a key, or if delivery fails, it opens a pre-filled email in the
- * visitor's own email app instead. Stores nothing in the browser.
+ * Contact form. Sends through Web3Forms when NEXT_PUBLIC_WEB3FORMS_KEY is set,
+ * and saves the message for /admin when Firebase is set up (lib/leads.ts).
+ * With neither, or if both fail, it opens a pre-filled email in the visitor's
+ * own email app instead. Stores nothing in the browser.
  */
 export function ContactForm({ className }: { className?: string }) {
   const uid = useId();
@@ -150,16 +158,20 @@ export function ContactForm({ className }: { className?: string }) {
     }
 
     setSentValues(values);
-    if (!WEB3FORMS_KEY) {
+    if (!WEB3FORMS_KEY && !leadsEnabled) {
       window.location.href = mailtoHref(values);
       showResult("emailed");
       return;
     }
     setStatus("sending");
-    try {
-      await sendWithWeb3Forms(values);
+    // Email it and save it for /admin at the same time; either one reaching us is enough.
+    const results = await Promise.allSettled([
+      WEB3FORMS_KEY ? sendWithWeb3Forms(values) : Promise.reject(),
+      leadsEnabled ? saveLead(leadFrom(values)) : Promise.reject(),
+    ]);
+    if (results.some((result) => result.status === "fulfilled")) {
       showResult("sent");
-    } catch {
+    } else {
       window.location.href = mailtoHref(values);
       showResult("failed");
     }
@@ -240,7 +252,7 @@ export function ContactForm({ className }: { className?: string }) {
       <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
         <FormField id={fieldId("name")} label="Full name" required error={errors.name}>
           {(props) => (
-            <input {...props} type="text" name="name" autoComplete="name" value={values.name} onChange={update("name")} onBlur={blur("name")} />
+            <input {...props} type="text" name="name" maxLength={120} autoComplete="name" value={values.name} onChange={update("name")} onBlur={blur("name")} />
           )}
         </FormField>
         <FormField id={fieldId("phone")} label="Phone" required error={errors.phone}>
@@ -260,7 +272,7 @@ export function ContactForm({ className }: { className?: string }) {
         </FormField>
         <FormField id={fieldId("email")} label="Email" error={errors.email} className="sm:col-span-2">
           {(props) => (
-            <input {...props} type="email" name="email" autoComplete="email" inputMode="email" value={values.email} onChange={update("email")} onBlur={blur("email")} />
+            <input {...props} type="email" name="email" maxLength={200} autoComplete="email" inputMode="email" value={values.email} onChange={update("email")} onBlur={blur("email")} />
           )}
         </FormField>
         <FormField id={fieldId("city")} label="City" required error={errors.city}>
@@ -298,6 +310,7 @@ export function ContactForm({ className }: { className?: string }) {
                 {...props}
                 type="text"
                 name="vehicle"
+                maxLength={120}
                 placeholder="e.g. 2016 Ford F-150"
                 value={values.vehicle}
                 onChange={update("vehicle")}
@@ -308,7 +321,7 @@ export function ContactForm({ className }: { className?: string }) {
         )}
         <FormField id={fieldId("message")} label="Message" required error={errors.message} className="sm:col-span-2">
           {(props) => (
-            <textarea {...props} name="message" rows={5} value={values.message} onChange={update("message")} onBlur={blur("message")} />
+            <textarea {...props} name="message" rows={5} maxLength={5000} value={values.message} onChange={update("message")} onBlur={blur("message")} />
           )}
         </FormField>
 

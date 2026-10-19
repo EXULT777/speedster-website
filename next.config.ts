@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SITE_URL: siteUrl,
     // Lets absoluteUrl() match the trailing-slash URLs of the Pages export.
     NEXT_PUBLIC_TRAILING_SLASH: pagesBasePath !== undefined ? "1" : "",
+    // next/image does not add basePath to plain string sources (see withBasePath()).
+    NEXT_PUBLIC_BASE_PATH: pagesBasePath ?? "",
   },
   images: {
     formats: ["image/avif", "image/webp"],

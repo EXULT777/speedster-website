@@ -6,6 +6,7 @@ import { PageHero } from "@/components/sections/page-hero";
 import { TexasMap } from "@/components/sections/texas-map";
 import { Section } from "@/components/ui/section";
 import { serviceAreasPage } from "@/content/areas";
+import { site } from "@/content/site";
 import { pageMetadata } from "@/lib/seo";
 
 const path = "/service-areas";
@@ -13,7 +14,7 @@ const path = "/service-areas";
 export const metadata: Metadata = pageMetadata({
   title: "Service Areas: Midland, Odessa, Lubbock & Amarillo, TX",
   description:
-    "Speedster Lock & Key provides mobile locksmith service in four West Texas cities: Midland, Odessa, Lubbock, and Amarillo. Choose your city or call (432) 216-0108.",
+    `Speedster Lock & Key provides mobile locksmith service in four West Texas cities: Midland, Odessa, Lubbock, and Amarillo. Choose your city or call ${site.phone.display}.`,
   path,
 });
 

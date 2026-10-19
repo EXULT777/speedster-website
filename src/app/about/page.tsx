@@ -14,7 +14,7 @@ import { Section, SectionHeading } from "@/components/ui/section";
 import { cities } from "@/content/areas";
 import { aboutPage } from "@/content/pages";
 import { site } from "@/content/site";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, withBasePath } from "@/lib/seo";
 
 const path = "/about";
 
@@ -79,7 +79,7 @@ export default function AboutPage() {
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {site.photos.map((photo) => (
               <li key={photo.src} className="card overflow-hidden">
-                <Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} className="h-auto w-full" sizes="(min-width: 1024px) 33vi, (min-width: 640px) 50vi, 100vi" />
+                <Image src={withBasePath(photo.src)} alt={photo.alt} width={photo.width} height={photo.height} className="h-auto w-full" sizes="(min-width: 1024px) 33vi, (min-width: 640px) 50vi, 100vi" />
                 {photo.caption && <p className="p-4 text-sm text-muted">{photo.caption}</p>}
               </li>
             ))}

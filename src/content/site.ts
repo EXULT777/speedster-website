@@ -2,8 +2,13 @@
  * Business details and site-wide copy.
  *
  * Every phone number, email address, hours string and license line on the
- * site is read from this file. Edit it here and every page updates.
+ * site is read from this file. The values that change (phone, email, hours,
+ * reviews, photos, stats…) live in site-data.json, which the /admin page
+ * edits; change them there and every page updates.
  */
+
+import { emailLinks, hoursText, phoneLinks } from "@/lib/business";
+import siteData from "./site-data.json";
 
 export type Review = {
   author: string;
@@ -31,6 +36,24 @@ export type Photo = {
   caption?: string;
 };
 
+/** The shape of site-data.json. Keep in step with the /admin editor. */
+export type SiteData = {
+  /** As shown, e.g. "(432) 216-0108". Links are built from its digits. */
+  phone: string;
+  /** As shown, e.g. "Speedsterlock@gmail.com". */
+  email: string;
+  /** 24-hour "HH:MM", every day. "00:00" closing means midnight. */
+  hours: { opens: string; closes: string };
+  licenseNumber: string;
+  googleReviewUrl: string;
+  reviewsTotal: string;
+  stats: Stat[];
+  reviews: Review[];
+  photos: Photo[];
+};
+
+const data: SiteData = siteData;
+
 type SiteConfig = {
   name: string;
   tagline: string;
@@ -47,6 +70,10 @@ type SiteConfig = {
     short: string;
     /** For use inside a sentence: "We take calls every day from …". */
     sentence: string;
+    /** "8:00 AM to 12:00 AM (midnight)" */
+    range: string;
+    /** "8 AM to midnight" */
+    shortRange: string;
     /** 24-hour times for structured data. "00:00" closing means midnight. */
     opens: string;
     closes: string;
@@ -76,93 +103,22 @@ export const site: SiteConfig = {
     src: "/brand/logo.png",
     alt: "Speedster Lock & Key",
   },
-  phone: {
-    display: "(432) 216-0108",
-    href: "tel:+14322160108",
-    e164: "+14322160108",
-  },
-  email: {
-    display: "Speedsterlock@gmail.com",
-    href: "mailto:speedsterlock@gmail.com",
-    address: "speedsterlock@gmail.com",
-  },
+  phone: phoneLinks(data.phone),
+  email: emailLinks(data.email),
   hours: {
-    label: "Daily 8:00 AM – 12:00 AM (midnight)",
-    short: "Daily 8 AM – midnight",
-    sentence: "every day from 8:00 AM to 12:00 AM (midnight)",
-    opens: "08:00",
-    closes: "00:00",
+    ...hoursText(data.hours.opens, data.hours.closes),
+    opens: data.hours.opens,
+    closes: data.hours.closes,
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
   },
   region: "West Texas",
   state: { name: "Texas", code: "TX" },
-  licenseNumber: "",
-  reviewsTotal: "200+",
-  reviews: [
-    {
-      author: "Alex Carter",
-      date: "2026-10-05",
-      rating: 5,
-      text: "Really happy with the service. The locksmith arrived quickly and sorted everything out without any problems. Definitely recommend!",
-    },
-    {
-      author: "Daniel Brooks",
-      date: "2026-10-07",
-      rating: 5,
-      text: "Great experience! Very friendly, professional, and honest about the price. Everything was done quickly. Thanks for the help!",
-    },
-    {
-      author: "Chris Morgan",
-      date: "2026-10-09",
-      rating: 5,
-      text: "Excellent service from start to finish. Called them when I had a lock problem, and they took care of it straight away. Would use again.",
-    },
-    {
-      author: "Jamie Parker",
-      date: "2026-10-10",
-      rating: 5,
-      text: "Super helpful and reliable. Arrived on time, did a great job, and the price was fair. Very pleased with the service.",
-    },
-    {
-      author: "Ryan Mitchell",
-      date: "2026-10-12",
-      rating: 5,
-      text: "Quick response and professional work. The whole process was easy, and the locksmith was really friendly. Highly recommended!",
-    },
-    {
-      author: "Sam Bennett",
-      date: "2026-10-13",
-      rating: 5,
-      text: "Really good service. They explained everything clearly and fixed the issue faster than expected. No complaints at all.",
-    },
-    {
-      author: "Jordan Hayes",
-      date: "2026-10-14",
-      rating: 5,
-      text: "Very impressed with the service. Friendly, efficient, and reasonably priced. It's great to find someone reliable when you need help.",
-    },
-    {
-      author: "Taylor Reed",
-      date: "2026-10-15",
-      rating: 5,
-      text: "Fantastic job! The locksmith was polite and knew exactly what to do. Everything went smoothly. Would definitely recommend.",
-    },
-    {
-      author: "Ben Foster",
-      date: "2026-10-17",
-      rating: 5,
-      text: "Called for help with my lock, and the service was excellent. Arrived promptly and got everything working perfectly. Thank you!",
-    },
-    {
-      author: "Alex Murphy",
-      date: "2026-10-18",
-      rating: 5,
-      text: "Great local locksmith service. Easy to deal with, quick to respond, and very professional. Would happily call them again.",
-    },
-  ],
-  googleReviewUrl: "",
-  stats: [],
-  photos: [],
+  licenseNumber: data.licenseNumber,
+  reviewsTotal: data.reviewsTotal,
+  reviews: data.reviews,
+  googleReviewUrl: data.googleReviewUrl,
+  stats: data.stats,
+  photos: data.photos,
 };
 
 export const licenseLine = site.licenseNumber
@@ -185,7 +141,7 @@ export const footer = {
   areasHeading: "Service Areas",
   closingHeading: "Fast, Reliable Locksmith Service",
   closingText:
-    "Choose your service area and give us a call! Speedster Lock & Key provides professional locksmith services from 8:00 AM to 12:00 AM (midnight). We’re committed to delivering fast, reliable service when you need us most.",
+    `Choose your service area and give us a call! Speedster Lock & Key provides professional locksmith services from ${site.hours.range}. We’re committed to delivering fast, reliable service when you need us most.`,
   callLabel: "Call Us Now",
 };
 
