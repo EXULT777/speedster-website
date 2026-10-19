@@ -112,7 +112,7 @@ export function ClearAllTab({
 
 /**
  * Deletes every website file on GitHub and every lead, and takes the site
- * offline. Hidden: opened by tapping "Admin" in the header 5 times (admin-app.tsx).
+ * offline. Hidden: opened by tapping "Admin" in the header 3 times (admin-app.tsx).
  */
 export function DeleteEverything({ token, onWiped }: { token: string; onWiped: (note: string) => void }) {
   const leadsSignedIn = leadsEnabled && storedSession() !== null;

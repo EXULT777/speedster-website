@@ -359,7 +359,7 @@ export function AdminApp() {
 }
 
 /** Taps on "Admin" within this many ms count towards opening the hidden section. */
-const SECRET_TAPS = 5;
+const SECRET_TAPS = 3;
 const SECRET_WINDOW = 3000;
 
 function Shell({ onSignOut, onSecret, children }: { onSignOut?: () => void; onSecret?: () => void; children: ReactNode }) {
@@ -378,7 +378,7 @@ function Shell({ onSignOut, onSecret, children }: { onSignOut?: () => void; onSe
       <header className="border-b border-white/10 bg-carbon">
         <div className="container-x flex min-h-16 items-center gap-3 py-2">
           <Logo height={40} link={false} eager />
-          {/* Deliberately looks like plain text: 5 quick taps open the hidden "Delete everything". */}
+          {/* Deliberately looks like plain text: 3 quick taps open the hidden "Delete everything". */}
           <span onClick={tap} className="display text-lg text-chrome-2 select-none">
             Admin
           </span>
