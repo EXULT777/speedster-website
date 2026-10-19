@@ -21,12 +21,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # "Delete everything" in /admin removes every file except this workflow.
+      # Then there is nothing to build, and an empty site is published instead.
+      - name: Check for website files
+        id: site
+        run: echo "present=$([ -f package.json ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Publish an empty site
+        if: steps.site.outputs.present != 'true'
+        run: mkdir -p out && touch out/.nojekyll
       - uses: actions/setup-node@v4
+        if: steps.site.outputs.present == 'true'
         with:
           node-version: 22
           cache: npm
       - run: npm ci
+        if: steps.site.outputs.present == 'true'
       - name: Build static site
+        if: steps.site.outputs.present == 'true'
         run: npx next build
         env:
           # The site lives at https://<user>.github.io/<repo>/. For a custom

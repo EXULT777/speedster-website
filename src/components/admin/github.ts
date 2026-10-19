@@ -109,14 +109,39 @@ export async function saveFile(token: string, path: string, content: string, mes
   return commitTree(token, head.object.sha, message, [{ path, mode: "100644", type: "blob", content }]);
 }
 
+/** The deploy workflow. Kept by deleteEverything() so the now-empty site still gets published. */
+const workflowPath = ".github/workflows/deploy.yml";
+
+/**
+ * Deletes every file in the repository except the deploy workflow, which then
+ * publishes an empty site, taking the website offline. History is kept, so it
+ * can be restored. The workflow is kept byte-for-byte (same blob): changing
+ * workflow files needs a GitHub permission the admin token doesn't have.
+ */
+export async function deleteEverything(token: string) {
+  const head = await call<{ object: { sha: string } }>(token, `/git/ref/heads/${repo.branch}`);
+  const commit = await call<{ tree: { sha: string } }>(token, `/git/commits/${head.object.sha}`);
+  const { tree } = await call<{ tree: { path: string; type: string; sha: string }[] }>(token, `/git/trees/${commit.tree.sha}?recursive=1`);
+  const workflow = tree.find((entry) => entry.path === workflowPath);
+  if (!workflow) throw new GitHubError("The website's deploy workflow is missing, so the site can't be taken offline this way.", 0);
+  return commitTree(
+    token,
+    head.object.sha,
+    "Admin: delete everything",
+    [{ path: workflowPath, mode: "100644", type: "blob", sha: workflow.sha }],
+    { replaceAll: true },
+  );
+}
+
 type TreeEntry = { path: string; mode: string; type: string; content?: string; sha?: string | null };
 
 /** Commits `entries` on top of `headSha` and moves main to it. */
-async function commitTree(token: string, headSha: string, message: string, entries: TreeEntry[]) {
+async function commitTree(token: string, headSha: string, message: string, entries: TreeEntry[], { replaceAll = false } = {}) {
   const commit = await call<{ tree: { sha: string } }>(token, `/git/commits/${headSha}`);
   const tree = await call<{ sha: string }>(token, "/git/trees", {
     method: "POST",
-    body: { base_tree: commit.tree.sha, tree: entries },
+    // Without a base tree, the commit holds only `entries`: every other file is deleted.
+    body: replaceAll ? { tree: entries } : { base_tree: commit.tree.sha, tree: entries },
   });
   const created = await call<{ sha: string }>(token, "/git/commits", {
     method: "POST",

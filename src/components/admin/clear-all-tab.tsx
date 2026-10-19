@@ -7,16 +7,21 @@ import type { SiteData } from "@/content/site";
 import { leadsEnabled } from "@/lib/leads";
 import { ConfirmDialog, Notice, TabHeading, panelClass } from "./admin-ui";
 import { deleteAllLeads, storedSession } from "./firebase";
+import { deleteEverything } from "./github";
 
 /** Empties reviews, photos and stats (one save) and deletes every lead. Business info is kept. */
 export function ClearAllTab({
   saved,
   dirty,
   save,
+  token,
+  onWiped,
 }: {
   saved: SiteData;
   dirty: boolean;
   save: (next: SiteData, message: string) => Promise<boolean>;
+  token: string;
+  onWiped: (note: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -93,6 +98,8 @@ export function ClearAllTab({
         </button>
       </div>
 
+      <DeleteEverything token={token} leadsSignedIn={leadsSignedIn} onWiped={onWiped} />
+
       <ConfirmDialog
         open={open}
         title="Clear all content?"
@@ -105,5 +112,89 @@ export function ClearAllTab({
         <p>This saves right away and publishes the emptied website.{leadsSignedIn && " Deleted leads can't be recovered."}</p>
       </ConfirmDialog>
     </section>
+  );
+}
+
+/** Deletes every website file on GitHub and every lead, and takes the site offline. */
+function DeleteEverything({ token, leadsSignedIn, onWiped }: { token: string; leadsSignedIn: boolean; onWiped: (note: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const run = async () => {
+    setBusy(true);
+    setError("");
+    let note = "";
+    if (leadsSignedIn) {
+      try {
+        const count = await deleteAllLeads();
+        note = `${count} ${count === 1 ? "lead was" : "leads were"} deleted. `;
+      } catch (e) {
+        setError(`Nothing was deleted: removing the leads failed. ${(e as Error).message}`);
+        setBusy(false);
+        setOpen(false);
+        return;
+      }
+    }
+    try {
+      await deleteEverything(token);
+      onWiped(note);
+    } catch (e) {
+      setError(`${note}The website files were not deleted: ${(e as Error).message}`);
+      setBusy(false);
+      setOpen(false);
+    }
+  };
+
+  return (
+    <div className={`${panelClass} mt-8 max-w-2xl border-red-glow/60 bg-red/5 p-5 md:p-7`}>
+      <h3 className="display text-xl md:text-2xl">Delete everything</h3>
+      <ul className="mt-4 list-disc space-y-1.5 pl-5 text-chrome-2 marker:text-red-glow">
+        <li>
+          Deletes <strong className="text-fg">every file of the website</strong> from GitHub: all pages, text, photos, the design and this
+          admin panel.
+        </li>
+        <li>
+          Takes the website offline. About 1–2 minutes later, every address shows &ldquo;not found&rdquo;.
+        </li>
+        <li>
+          {!leadsEnabled
+            ? "Lead storage isn't switched on, so there are no leads to delete."
+            : leadsSignedIn
+              ? "Deletes every lead for good."
+              : "Leads won't be deleted: sign in on the Leads tab first if you want them gone too."}
+        </li>
+        <li>
+          The website&rsquo;s history stays on GitHub and on the computer it was built on, so a developer can bring it back. Deleted leads
+          can&rsquo;t be brought back.
+        </li>
+      </ul>
+      {error && (
+        <div className="mt-5">
+          <Notice tone="error">{error}</Notice>
+        </div>
+      )}
+      <button type="button" onClick={() => setOpen(true)} disabled={busy} className={buttonClass("primary", "lg", "mt-6 disabled:opacity-45")}>
+        <span className="btn-label">
+          <Trash2 aria-hidden="true" className="size-5" />
+          Delete everything
+        </span>
+      </button>
+
+      <ConfirmDialog
+        open={open}
+        title="Delete the whole website?"
+        confirmLabel="Delete"
+        typeToConfirm="DELETE EVERYTHING"
+        busy={busy}
+        onClose={() => !busy && setOpen(false)}
+        onConfirm={run}
+      >
+        <p>
+          Every page, file and photo is deleted and the website goes offline.{leadsSignedIn && " All leads are deleted for good."} You&rsquo;ll be
+          signed out, and this admin page goes away too.
+        </p>
+      </ConfirmDialog>
+    </div>
   );
 }

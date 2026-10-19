@@ -88,6 +88,8 @@ export function AdminApp() {
   /** Showing the setup screen again, e.g. after the GitHub key expired. */
   const [resetting, setResetting] = useState(false);
   const [setupDone, setSetupDone] = useState(false);
+  /** Set (to a note about leads) once "Delete everything" has run. */
+  const [wiped, setWiped] = useState<string | null>(null);
   /** Photos picked but not saved yet, and local previews of saved ones, by site path. */
   const pending = useRef(new Map<string, PendingPhoto>());
   const [, setPendingCount] = useState(0);
@@ -206,6 +208,27 @@ export function AdminApp() {
   }, []);
   const previewUrl = useCallback((src: string) => pending.current.get(src)?.url ?? photoPreviewUrl(src), []);
 
+  /** After "Delete everything": sign out everywhere and say what happened. */
+  const wipe = (note: string) => {
+    clearStored(TOKEN_KEY);
+    clearStored(USER_KEY);
+    signOutLeads();
+    setWiped(note);
+    setToken(null);
+  };
+
+  if (wiped !== null)
+    return (
+      <Shell>
+        <div className="mx-auto max-w-xl">
+          <Notice tone="success">
+            {wiped}Every website file was deleted. The website goes offline in about 1–2 minutes, and every address will show
+            &ldquo;not found&rdquo;. You&rsquo;ve been signed out.
+          </Notice>
+        </div>
+      </Shell>
+    );
+
   if (token === undefined) return null;
 
   /** Keeps the session in this browser and opens the leads with the same password. */
@@ -290,7 +313,7 @@ export function AdminApp() {
           {tab === "stats" && <StatsTab data={draft} update={update} />}
           {tab === "leads" && <LeadsTab />}
           {tab === "account" && <AccountTab token={token} />}
-          {tab === "clear" && <ClearAllTab saved={saved.data} dirty={dirty} save={commit} />}
+          {tab === "clear" && <ClearAllTab saved={saved.data} dirty={dirty} save={commit} token={token} onWiped={wipe} />}
 
           {(dirty || saving || saveError) && (
             <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-ink/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg">
