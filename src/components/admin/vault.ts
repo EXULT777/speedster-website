@@ -12,6 +12,7 @@
  */
 
 import vaultFile from "@/content/admin-vault.json";
+import deleteLockFile from "@/content/delete-lock.json";
 
 export const vaultPath = "src/content/admin-vault.json";
 
@@ -61,6 +62,21 @@ export async function unlockToken(vault: Vault, username: string, password: stri
   } catch {
     throw new WrongLogin("Wrong username or password.");
   }
+}
+
+/**
+ * The separate code that unlocks "Delete everything". Only a slow hash of it
+ * is stored (src/content/delete-lock.json); null means no code is set and the
+ * button stays locked.
+ */
+export type CodeLock = { iterations: number; salt: string; hash: string };
+
+export const deleteLock = deleteLockFile as CodeLock | null;
+
+export async function checkCode(lock: CodeLock, code: string) {
+  const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(code.trim()), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: fromBase64(lock.salt), iterations: lock.iterations }, material, 256);
+  return toBase64(new Uint8Array(bits)) === lock.hash;
 }
 
 export const serializeVault = (vault: Vault) => `${JSON.stringify(vault, null, 2)}\n`;

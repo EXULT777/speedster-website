@@ -63,7 +63,7 @@ Leave them empty and those sections stay hidden.
 - **Reviews**, **Photos** (upload, describe, reorder, delete), **Stats**
 - **Leads**: contact-form messages (needs Firebase, below)
 - **Clear all**: empties reviews, photos and stats and deletes every lead. Phone, email and hours are kept.
-- **Delete everything** (on the Clear all tab, type DELETE EVERYTHING): deletes every lead and every file in this repository except `.github/workflows/deploy.yml`, which then publishes an empty site, so every address shows "not found". The commit is a normal one on top of history: to bring the site back, revert it (`git revert <commit>` and push) or push from a local copy. Deleted leads can't be restored.
+- **Delete everything** (on the Clear all tab; locked until its own delete code is entered, then type DELETE EVERYTHING). Set or change the code with `node scripts/delete-code.mjs "<code>"` and push; only a hash is stored in `src/content/delete-lock.json`. It deletes every lead and every file in this repository except `.github/workflows/deploy.yml`, which then publishes an empty site, so every address shows "not found". The commit is a normal one on top of history: to bring the site back, revert it (`git revert <commit>` and push) or push from a local copy. Deleted leads can't be restored.
 
 Every "Delete all" asks you to type DELETE.
 

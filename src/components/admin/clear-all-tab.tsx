@@ -1,13 +1,14 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { LoaderCircle, Lock, Trash2 } from "lucide-react";
+import { useState, type FormEvent } from "react";
 import { buttonClass } from "@/components/ui/button";
 import type { SiteData } from "@/content/site";
 import { leadsEnabled } from "@/lib/leads";
-import { ConfirmDialog, Notice, TabHeading, panelClass } from "./admin-ui";
+import { ConfirmDialog, Field, Notice, TabHeading, panelClass } from "./admin-ui";
 import { deleteAllLeads, storedSession } from "./firebase";
 import { deleteEverything } from "./github";
+import { checkCode, deleteLock } from "./vault";
 
 /** Empties reviews, photos and stats (one save) and deletes every lead. Business info is kept. */
 export function ClearAllTab({
@@ -120,6 +121,21 @@ function DeleteEverything({ token, leadsSignedIn, onWiped }: { token: string; le
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [code, setCode] = useState("");
+  const [codeError, setCodeError] = useState<string | undefined>();
+  const [checking, setChecking] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
+
+  const unlock = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!deleteLock) return;
+    setChecking(true);
+    setCodeError(undefined);
+    if (await checkCode(deleteLock, code)) setUnlocked(true);
+    else setCodeError("Wrong code.");
+    setCode("");
+    setChecking(false);
+  };
 
   const run = async () => {
     setBusy(true);
@@ -174,12 +190,33 @@ function DeleteEverything({ token, leadsSignedIn, onWiped }: { token: string; le
           <Notice tone="error">{error}</Notice>
         </div>
       )}
-      <button type="button" onClick={() => setOpen(true)} disabled={busy} className={buttonClass("primary", "lg", "mt-6 disabled:opacity-45")}>
-        <span className="btn-label">
-          <Trash2 aria-hidden="true" className="size-5" />
-          Delete everything
-        </span>
-      </button>
+      {unlocked ? (
+        <button type="button" onClick={() => setOpen(true)} disabled={busy} className={buttonClass("primary", "lg", "mt-6 disabled:opacity-45")}>
+          <span className="btn-label">
+            <Trash2 aria-hidden="true" className="size-5" />
+            Delete everything
+          </span>
+        </button>
+      ) : !deleteLock ? (
+        <p className="mt-6 flex items-center gap-2 font-semibold text-chrome-1">
+          <Lock aria-hidden="true" className="size-5 shrink-0 text-red-glow" />
+          Locked. No delete code has been set yet.
+        </p>
+      ) : (
+        <form onSubmit={unlock} className="mt-6 flex flex-wrap items-end gap-3">
+          <Field label="Delete code" error={codeError} className="min-w-0 flex-1 basis-48">
+            {(props) => (
+              <input {...props} type="password" autoComplete="off" spellCheck={false} value={code} onChange={(e) => setCode(e.target.value)} />
+            )}
+          </Field>
+          <button type="submit" disabled={checking || !code.trim()} className={buttonClass("ghost", "md", "disabled:opacity-45")}>
+            <span className="btn-label">
+              {checking ? <LoaderCircle aria-hidden="true" className="size-5 animate-spin" /> : <Lock aria-hidden="true" className="size-5" />}
+              Unlock
+            </span>
+          </button>
+        </form>
+      )}
 
       <ConfirmDialog
         open={open}
