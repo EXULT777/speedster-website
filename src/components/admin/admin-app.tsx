@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 import { leadsAdminEmail, leadsEnabled } from "@/lib/leads";
 import { Notice } from "./admin-ui";
 import { BusinessTab, businessErrors } from "./business-tab";
-import { ClearAllTab } from "./clear-all-tab";
+import { ClearAllTab, DeleteEverything } from "./clear-all-tab";
 import { AccountTab } from "./account-tab";
 import { signInLeads, signOutLeads } from "./firebase";
 import { ConflictError, GitHubError, deployState, loadData, photoPreviewUrl, saveData, serialize, type DeployState } from "./github";
@@ -33,7 +33,8 @@ const tabs = [
   { id: "account", label: "Password", icon: KeyRound },
   { id: "clear", label: "Clear all", icon: Trash2 },
 ] as const;
-type Tab = (typeof tabs)[number]["id"];
+/** "secret" is the hidden "Delete everything" section, not listed in the tabs. */
+type Tab = (typeof tabs)[number]["id"] | "secret";
 
 const hasError = (errors: Record<string, string | undefined>) => Object.values(errors).some(Boolean);
 
@@ -261,7 +262,7 @@ export function AdminApp() {
     );
 
   return (
-    <Shell onSignOut={signOut}>
+    <Shell onSignOut={signOut} onSecret={saved ? () => setTab("secret") : undefined}>
       {!draft || !saved ? (
         loadError ? (
           <div className="grid max-w-xl gap-4">
@@ -313,7 +314,8 @@ export function AdminApp() {
           {tab === "stats" && <StatsTab data={draft} update={update} />}
           {tab === "leads" && <LeadsTab />}
           {tab === "account" && <AccountTab token={token} />}
-          {tab === "clear" && <ClearAllTab saved={saved.data} dirty={dirty} save={commit} token={token} onWiped={wipe} />}
+          {tab === "clear" && <ClearAllTab saved={saved.data} dirty={dirty} save={commit} />}
+          {tab === "secret" && <DeleteEverything token={token} onWiped={wipe} />}
 
           {(dirty || saving || saveError) && (
             <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-ink/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg">
@@ -356,13 +358,30 @@ export function AdminApp() {
   );
 }
 
-function Shell({ onSignOut, children }: { onSignOut?: () => void; children: ReactNode }) {
+/** Taps on "Admin" within this many ms count towards opening the hidden section. */
+const SECRET_TAPS = 5;
+const SECRET_WINDOW = 3000;
+
+function Shell({ onSignOut, onSecret, children }: { onSignOut?: () => void; onSecret?: () => void; children: ReactNode }) {
+  const taps = useRef<number[]>([]);
+  const tap = () => {
+    if (!onSecret) return;
+    const now = Date.now();
+    taps.current = [...taps.current.filter((t) => now - t < SECRET_WINDOW), now];
+    if (taps.current.length >= SECRET_TAPS) {
+      taps.current = [];
+      onSecret();
+    }
+  };
   return (
     <div className="min-h-dvh pb-40">
       <header className="border-b border-white/10 bg-carbon">
         <div className="container-x flex min-h-16 items-center gap-3 py-2">
           <Logo height={40} link={false} eager />
-          <span className="display text-lg text-chrome-2">Admin</span>
+          {/* Deliberately looks like plain text: 5 quick taps open the hidden "Delete everything". */}
+          <span onClick={tap} className="display text-lg text-chrome-2 select-none">
+            Admin
+          </span>
           <div className="ml-auto flex items-center gap-2">
             <Link href="/" target="_blank" className={buttonClass("ghost", "sm")}>
               <span className="btn-label">

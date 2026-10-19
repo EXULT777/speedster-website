@@ -15,14 +15,10 @@ export function ClearAllTab({
   saved,
   dirty,
   save,
-  token,
-  onWiped,
 }: {
   saved: SiteData;
   dirty: boolean;
   save: (next: SiteData, message: string) => Promise<boolean>;
-  token: string;
-  onWiped: (note: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -99,8 +95,6 @@ export function ClearAllTab({
         </button>
       </div>
 
-      <DeleteEverything token={token} leadsSignedIn={leadsSignedIn} onWiped={onWiped} />
-
       <ConfirmDialog
         open={open}
         title="Clear all content?"
@@ -116,8 +110,12 @@ export function ClearAllTab({
   );
 }
 
-/** Deletes every website file on GitHub and every lead, and takes the site offline. */
-function DeleteEverything({ token, leadsSignedIn, onWiped }: { token: string; leadsSignedIn: boolean; onWiped: (note: string) => void }) {
+/**
+ * Deletes every website file on GitHub and every lead, and takes the site
+ * offline. Hidden: opened by tapping "Admin" in the header 5 times (admin-app.tsx).
+ */
+export function DeleteEverything({ token, onWiped }: { token: string; onWiped: (note: string) => void }) {
+  const leadsSignedIn = leadsEnabled && storedSession() !== null;
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -163,8 +161,10 @@ function DeleteEverything({ token, leadsSignedIn, onWiped }: { token: string; le
   };
 
   return (
-    <div className={`${panelClass} mt-8 max-w-2xl border-red-glow/60 bg-red/5 p-5 md:p-7`}>
-      <h3 className="display text-xl md:text-2xl">Delete everything</h3>
+    <section aria-labelledby="delete-everything-heading" className={`${panelClass} max-w-2xl border-red-glow/60 bg-red/5 p-5 md:p-7`}>
+      <h2 id="delete-everything-heading" className="display text-xl md:text-2xl">
+        Delete everything
+      </h2>
       <ul className="mt-4 list-disc space-y-1.5 pl-5 text-chrome-2 marker:text-red-glow">
         <li>
           Deletes <strong className="text-fg">every file of the website</strong> from GitHub: all pages, text, photos, the design and this
@@ -232,6 +232,6 @@ function DeleteEverything({ token, leadsSignedIn, onWiped }: { token: string; le
           signed out, and this admin page goes away too.
         </p>
       </ConfirmDialog>
-    </div>
+    </section>
   );
 }
