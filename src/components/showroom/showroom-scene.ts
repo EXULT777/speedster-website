@@ -483,7 +483,8 @@ export function createShowroomScene(
       canvas.removeEventListener("pointercancel", onUp);
       disposables.forEach((d) => d.dispose());
       renderer.dispose();
-      // Free the WebGL context now; browsers cap how many a page may hold.
+      // Free the WebGL context now (browsers cap how many a page may hold). The
+      // React wrapper gives every scene a fresh canvas, so none is reused after this.
       renderer.forceContextLoss();
     },
   };

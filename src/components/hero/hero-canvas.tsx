@@ -18,12 +18,16 @@ export default function HeroCanvas({
   /** Must be stable (the scene is created once per `still` value). */
   onReady: () => void;
 }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<KeyScene | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const host = hostRef.current;
+    if (!host) return;
+    // A new canvas per scene: dispose() frees its WebGL context for good.
+    const canvas = document.createElement("canvas");
+    canvas.className = "block h-full w-full";
+    host.appendChild(canvas);
     const scene = createKeyScene(canvas, {
       still,
       getPress: () => heroState.press,
@@ -33,6 +37,7 @@ export default function HeroCanvas({
     sceneRef.current = scene;
     return () => {
       scene.dispose();
+      canvas.remove();
       sceneRef.current = null;
     };
   }, [still, onReady]);
@@ -41,5 +46,5 @@ export default function HeroCanvas({
     sceneRef.current?.setActive(active);
   }, [active]);
 
-  return <canvas ref={canvasRef} aria-hidden="true" className="block h-full w-full" />;
+  return <div ref={hostRef} aria-hidden="true" className="h-full w-full" />;
 }

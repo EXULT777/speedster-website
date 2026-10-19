@@ -20,7 +20,7 @@ export function KeyShowroom({ className }: { className?: string }) {
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasHostRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<ShowroomScene | null>(null);
   const selectedRef = useRef(selected);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -30,8 +30,12 @@ export function KeyShowroom({ className }: { className?: string }) {
   // Create the scene once the showroom is close to the screen; render only while visible.
   useEffect(() => {
     const stage = stageRef.current;
-    const canvas = canvasRef.current;
-    if (!enabled || !stage || !canvas) return;
+    const host = canvasHostRef.current;
+    if (!enabled || !stage || !host) return;
+    // A new canvas per scene: dispose() frees its WebGL context for good.
+    const canvas = document.createElement("canvas");
+    canvas.className = "block h-full w-full";
+    host.appendChild(canvas);
     let disposed = false;
     let started = false;
     const observer = new IntersectionObserver(
@@ -58,6 +62,7 @@ export function KeyShowroom({ className }: { className?: string }) {
       observer.disconnect();
       sceneRef.current?.dispose();
       sceneRef.current = null;
+      canvas.remove();
     };
   }, [enabled, still]);
 
@@ -106,8 +111,8 @@ export function KeyShowroom({ className }: { className?: string }) {
           <KeyArt />
         </div>
         {enabled && (
-          <canvas
-            ref={canvasRef}
+          <div
+            ref={canvasHostRef}
             aria-hidden="true"
             className={cn(
               "absolute inset-0 h-full w-full cursor-grab touch-pan-y transition-opacity duration-300 active:cursor-grabbing",
