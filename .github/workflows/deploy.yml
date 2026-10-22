@@ -1,6 +1,7 @@
-# Builds the site as static files and publishes it to GitHub Pages
-# on every push to main. Can also be run by hand from the Actions tab.
-name: Deploy to GitHub Pages
+# Builds the site as static files and uploads them to the Namecheap hosting
+# (public_html) on every push to main, including saves from /admin. Can also be
+# run by hand from the Actions tab.
+name: Deploy website
 
 on:
   push:
@@ -9,15 +10,13 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +27,7 @@ jobs:
         run: echo "present=$([ -f package.json ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - name: Publish an empty site
         if: steps.site.outputs.present != 'true'
-        run: mkdir -p out && touch out/.nojekyll
+        run: mkdir -p out
       - uses: actions/setup-node@v4
         if: steps.site.outputs.present == 'true'
         with:
@@ -40,26 +39,29 @@ jobs:
         if: steps.site.outputs.present == 'true'
         run: npx next build
         env:
-          # The site lives at https://<user>.github.io/<repo>/. For a custom
-          # domain, set PAGES_BASE_PATH to "" and NEXT_PUBLIC_SITE_URL to the domain.
-          PAGES_BASE_PATH: /speedster-website
-          NEXT_PUBLIC_SITE_URL: https://exult777.github.io/speedster-website
+          # Static export served from the root of the domain (see next.config.ts).
+          PAGES_BASE_PATH: ""
+          NEXT_PUBLIC_SITE_URL: https://speedsterlocknkey.com
           # Add this secret in Settings → Secrets and variables → Actions to turn on email delivery.
           NEXT_PUBLIC_WEB3FORMS_KEY: ${{ secrets.WEB3FORMS_KEY }}
           # Firebase project that stores contact-form leads for /admin (see README).
           # Add both under Settings → Secrets and variables → Actions → Variables.
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ vars.FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
-      - uses: actions/upload-pages-artifact@v3
+      # Uploads only what changed since the last deploy and removes files that
+      # are no longer part of the site. Files it didn't upload (cgi-bin,
+      # .well-known) are left alone. Add the three secrets under Settings →
+      # Secrets and variables → Actions (see README).
+      - name: Upload to Namecheap
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
-          path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Encrypted FTP. "loose" accepts the hosting server's certificate,
+          # which is issued to the server's own name rather than ftp.<domain>.
+          protocol: ftps
+          security: loose
+          local-dir: ./out/
+          # The FTP account's folder is public_html.
+          server-dir: ./

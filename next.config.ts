@@ -19,9 +19,10 @@ const lanAddresses = Object.values(os.networkInterfaces())
   .filter((info): info is os.NetworkInterfaceInfo => !!info && info.family === "IPv4" && !info.internal)
   .map((info) => info.address);
 
-// Set only by the GitHub Pages workflow (.github/workflows/deploy.yml): builds a
-// static site into out/ that lives under a sub-path such as /speedster-website.
-// Unset for `npm run dev` and `npm run build`, which work as before.
+// Set only by the deploy workflow (.github/workflows/deploy.yml): builds a static
+// site into out/ for the Namecheap hosting. "" serves it from the domain root; a
+// sub-path such as /speedster-website is also supported (that's how it ran on
+// GitHub Pages). Unset for `npm run dev` and `npm run build`, which work as before.
 const pagesBasePath = process.env.PAGES_BASE_PATH?.replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {

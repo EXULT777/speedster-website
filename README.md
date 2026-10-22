@@ -57,7 +57,7 @@ Leave them empty and those sections stay hidden.
 
 ## Admin panel
 
-`/admin` (https://exult777.github.io/speedster-website/admin/) is a private editing page. It isn't linked from the site and search engines are told not to list it. It has:
+`/admin` (https://speedsterlocknkey.com/admin/) is a private editing page. It isn't linked from the site and search engines are told not to list it. It has:
 
 - **Business**: phone, email, opening hours, license number, total review count, Google review link
 - **Reviews**, **Photos** (upload, describe, reorder, delete), **Stats**
@@ -112,13 +112,15 @@ Create `.env.local` for local development, or set these in your hosting dashboar
 | `NEXT_PUBLIC_WEB3FORMS_KEY`  | Access key from [web3forms.com](https://web3forms.com) for the contact form. Without it, the form opens a pre-filled email instead.  |
 | `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase project that stores contact-form leads for `/admin` (see [Contact-form leads](#contact-form-leads-firebase)). Without them, nothing is stored. |
 
-## Deploy to GitHub Pages
+## Deploy to Namecheap
 
-The site is live at https://exult777.github.io/speedster-website/. Every push to `main` rebuilds and publishes it through `.github/workflows/deploy.yml` (progress shows in the repository's **Actions** tab).
+The site is live at https://speedsterlocknkey.com/ on Namecheap shared hosting. Every push to `main` (including saves from `/admin`) rebuilds it and uploads it to `public_html` through `.github/workflows/deploy.yml` (progress shows in the repository's **Actions** tab).
 
-- The workflow sets `PAGES_BASE_PATH`, which switches `next.config.ts` to a static export in `out/` served under `/speedster-website`. Without it, `npm run dev` and `npm run build` work as a normal Next.js app.
-- To turn on email delivery from the contact form, add a repository secret named `WEB3FORMS_KEY` (**Settings → Secrets and variables → Actions**) and re-run the workflow.
-- For a custom domain, add it under **Settings → Pages**, then in the workflow set `PAGES_BASE_PATH` to `""` and `NEXT_PUBLIC_SITE_URL` to the domain.
+- The workflow sets `PAGES_BASE_PATH` to `""`, which switches `next.config.ts` to a static export in `out/`. Without it, `npm run dev` and `npm run build` work as a normal Next.js app.
+- `public/.htaccess` is uploaded with the site: it sends everyone to `https://` without `www`, shows the 404 page and sets caching.
+- Upload uses an FTP account whose folder is `public_html` (cPanel → **FTP Accounts**). Its details are three repository secrets (**Settings → Secrets and variables → Actions**): `FTP_SERVER` (e.g. `ftp.speedsterlocknkey.com`), `FTP_USERNAME` (the full name, e.g. `deploy@speedsterlocknkey.com`) and `FTP_PASSWORD`.
+- Only changed files are uploaded; the record of what was uploaded is `.ftp-deploy-sync-state.json` in `public_html`. Deleting it makes the next run upload everything again.
+- To turn on email delivery from the contact form, add a repository secret named `WEB3FORMS_KEY` and re-run the workflow.
 
 ## Deploy to Vercel
 
@@ -127,7 +129,7 @@ The site is live at https://exult777.github.io/speedster-website/. Every push to
 3. Under **Environment Variables**, add `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_WEB3FORMS_KEY`.
 4. Deploy. After adding a custom domain, update `NEXT_PUBLIC_SITE_URL` and redeploy.
 
-Every page is generated as static HTML at build time. The GitHub Pages build fails if a page accidentally becomes dynamic.
+Every page is generated as static HTML at build time. The static export build fails if a page accidentally becomes dynamic.
 
 ## Fonts
 
